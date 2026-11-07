@@ -2,6 +2,8 @@
 
 **The Switch room that decides whether anyone may flip the switch.**
 
+**Demo video (1:51):** https://youtu.be/5vJ4R0h9mjU
+
 A line crew is on a section. Someone in the chat says "close S2". Clearance is one room where Claude agents do the switching paperwork, Switch decides who may give them orders, and a safety kernel refuses any step that could energize a line with people on it.
 
 - **20,856 broken switching orders:** 11,140 reach an unsafe state with no checks. With Clearance, 0. (`python3 -m clearance.evaluate`)
