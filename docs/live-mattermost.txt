@@ -1,0 +1,70 @@
+          gate Hey! I'm on standby — @gate to get started.
+          desk Hello! I'm ready — just tag @desk when you need me.
+          user @gate claim-gate
+          gate gate claimed
+  crewleada362 @gate issue C-A
+          gate @crewleada362 I only take instructions from my owner, and this chat account isn't linked to a Switch user yet — so I can't tell whether that's you. If it is, link this account to your Switch user in Switch Console and try again.
+  crewleada362 @desk issue C-A
+          desk REFUSED: issue is for the gate agent only
+  crewleada362 @desk request C-A crew-a SEC_2
+          desk OK request C-A crew-a SEC_2
+          user @gate open S2
+          gate OK open S2
+          user @gate tag C-A S2
+          gate OK tag C-A S2
+          user @gate open S3
+          gate OK open S3
+          user @gate tag C-A S3
+          gate OK tag C-A S3
+          user @gate issue C-A
+          gate REFUSED: cannot issue C-A: SEC_2 is still live via DG-DG_SW-SEC_2
+          user @gate open DG_SW
+          gate OK open DG_SW
+          user @gate tag C-A DG_SW
+          gate OK tag C-A DG_SW
+          user @gate issue C-A
+          gate OK issue C-A
+  crewleada362 @desk test-dead C-A
+          desk OK test-dead C-A
+  crewleada362 @desk ground C-A
+          desk OK ground C-A
+  crewleada362 @desk start-work C-A
+          desk OK start-work C-A
+  crewleada362 @desk request C-B crew-b SEC_2
+          desk OK request C-B crew-b SEC_2
+          user @gate open S2
+          gate OK open S2
+          user @gate tag C-B S2
+          gate OK tag C-B S2
+          user @gate open S3
+          gate OK open S3
+          user @gate tag C-B S3
+          gate OK tag C-B S3
+          user @gate open DG_SW
+          gate OK open DG_SW
+          user @gate tag C-B DG_SW
+          gate OK tag C-B DG_SW
+          user @gate issue C-B
+          gate OK issue C-B
+  crewleada362 @desk test-dead C-B
+          desk OK test-dead C-B
+  crewleada362 @desk ground C-B
+          desk OK ground C-B
+  crewleada362 @desk start-work C-B
+          desk OK start-work C-B
+  crewleada362 @desk clear-line C-A
+          desk OK clear-line C-A
+  crewleada362 @desk remove-ground C-A
+          desk OK remove-ground C-A
+  crewleada362 @desk release C-A crew-a
+          desk OK release C-A crew-a
+          user @gate untag C-A S2
+          gate OK untag C-A S2
+          user @gate untag C-A S3
+          gate OK untag C-A S3
+          user @gate untag C-A DG_SW
+          gate OK untag C-A DG_SW
+          user @gate close S2
+          gate REFUSED: cannot close S2: tagged under C-B (crew-b)
+
+channel clearance-control-a362

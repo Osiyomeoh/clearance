@@ -1,0 +1,75 @@
+SIMULATED network. Transcript read back from Switch's message history.
+
+      gate [agent] Hi! I'm here to help — mention @gate anytime.
+      desk [agent] Hi! Mention @desk to get my attention.
+Duty Operator [human] @gate claim-gate
+      gate [agent] gate claimed
+ Crew Lead [human] @gate issue C-A
+      gate [agent] @Crew Lead You're not permitted to direct messages to me in this room — my operator has restricted who can address me here.
+ Crew Lead [human] @desk issue C-A
+      desk [agent] REFUSED: issue is for the gate agent only
+ Crew Lead [human] @desk request C-A crew-a SEC_2
+      desk [agent] OK request C-A crew-a SEC_2
+Duty Operator [human] @gate open S2
+      gate [agent] OK open S2
+Duty Operator [human] @gate tag C-A S2
+      gate [agent] OK tag C-A S2
+Duty Operator [human] @gate open S3
+      gate [agent] OK open S3
+Duty Operator [human] @gate tag C-A S3
+      gate [agent] OK tag C-A S3
+Duty Operator [human] @gate issue C-A
+      gate [agent] REFUSED: cannot issue C-A: SEC_2 is still live via DG-DG_SW-SEC_2
+Duty Operator [human] @gate open DG_SW
+      gate [agent] OK open DG_SW
+Duty Operator [human] @gate tag C-A DG_SW
+      gate [agent] OK tag C-A DG_SW
+Duty Operator [human] @gate issue C-A
+      gate [agent] OK issue C-A
+ Crew Lead [human] @desk test-dead C-A
+      desk [agent] OK test-dead C-A
+ Crew Lead [human] @desk ground C-A
+      desk [agent] OK ground C-A
+ Crew Lead [human] @desk start-work C-A
+      desk [agent] OK start-work C-A
+ Crew Lead [human] @desk request C-B crew-b SEC_2
+      desk [agent] OK request C-B crew-b SEC_2
+Duty Operator [human] @gate open S2
+      gate [agent] OK open S2
+Duty Operator [human] @gate tag C-B S2
+      gate [agent] OK tag C-B S2
+Duty Operator [human] @gate open S3
+      gate [agent] OK open S3
+Duty Operator [human] @gate tag C-B S3
+      gate [agent] OK tag C-B S3
+Duty Operator [human] @gate open DG_SW
+      gate [agent] OK open DG_SW
+Duty Operator [human] @gate tag C-B DG_SW
+      gate [agent] OK tag C-B DG_SW
+Duty Operator [human] @gate issue C-B
+      gate [agent] OK issue C-B
+ Crew Lead [human] @desk test-dead C-B
+      desk [agent] OK test-dead C-B
+ Crew Lead [human] @desk ground C-B
+      desk [agent] OK ground C-B
+ Crew Lead [human] @desk start-work C-B
+      desk [agent] OK start-work C-B
+ Crew Lead [human] @desk clear-line C-A
+      desk [agent] OK clear-line C-A
+ Crew Lead [human] @desk remove-ground C-A
+      desk [agent] OK remove-ground C-A
+ Crew Lead [human] @desk release C-A crew-a
+      desk [agent] OK release C-A crew-a
+Duty Operator [human] @gate untag C-A S2
+      gate [agent] OK untag C-A S2
+Duty Operator [human] @gate untag C-A S3
+      gate [agent] OK untag C-A S3
+Duty Operator [human] @gate untag C-A DG_SW
+      gate [agent] OK untag C-A DG_SW
+Duty Operator [human] @gate close S2
+      gate [agent] REFUSED: cannot close S2: tagged under C-B (crew-b)
+
+agent widening its own addressing -> 403: An agent can't change its own settings, permissions or services. Your owner changes them on your page in Switch Console.
+
+room 92ec7c44-0185-4e35-a993-bc1ab3944994
+messages 68
