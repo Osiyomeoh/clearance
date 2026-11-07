@@ -1,0 +1,5 @@
+.state/
+.gate.key
+__pycache__/
+*.pyc
+.venv/

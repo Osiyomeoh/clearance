@@ -1,0 +1,78 @@
+# Clearance room: import in Switch Console. The deployer is the system operator.
+version: 1
+
+params:
+  prefix:
+    type: string
+    description: Prefix for agent and room names
+    pattern: "[a-z][a-z0-9-]*"
+    default: clearance
+  clearance_dir:
+    type: string
+    description: Absolute path to your clone of this repository
+  provider:
+    type: provider
+    default: [claude, codex, opencode]
+    input: advanced
+  location:
+    type: location
+    default: local
+    input: advanced
+  directory:
+    type: directory
+    default: "{$agents_dir}/{agent}"
+    input: advanced
+  bridge:
+    type: bridge
+    default: [$first]
+
+agents:
+  - name: "{prefix}-gate"
+    description: Issues clearances and orders switching. Takes instructions only from the system operator.
+    addressing: owner
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{directory}"
+    instructions: |
+      You act only on the system operator's instructions. Switch delivers only
+      their messages to you as instructions.
+      Run {clearance_dir}/bin/clearance from your own directory. Your commands:
+      claim-gate, open SW, tag ID SW, issue ID, untag ID SW, close SW, status.
+      Run exactly what the operator asked, one command per step. Post the CLI's
+      output word for word, including REFUSED lines.
+      A refusal is final. Never retry it another way, never edit state files,
+      never suggest a workaround. Ask the operator what to do.
+      Never report a step as done unless the CLI printed OK.
+  - name: "{prefix}-desk"
+    description: Takes crew reports and logs them. Cannot issue a clearance or order switching.
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{directory}"
+    instructions: |
+      You log what crews report. Run {clearance_dir}/bin/clearance from your own
+      directory. Your commands: request ID CREW SECTION, test-dead ID, ground ID,
+      start-work ID, clear-line ID, remove-ground ID, release ID CREW, status.
+      The CREW is the crew of the person speaking. Post the CLI's output word for
+      word, including REFUSED lines.
+      You cannot issue clearances or switch anything. When asked to, say that only
+      the system operator can, through the gate. Never read another agent's files
+      and never edit state files.
+
+room:
+  name: "{prefix}-control"
+  description: Simulated feeder. Operator, crews, and two agents share one record.
+  bridge: "{bridge}"
+  agents: ["{prefix}-gate", "{prefix}-desk"]
+  users: ["{$creator}"]
+  instructions: |
+    This room coordinates switching clearances on a SIMULATED feeder. Nothing here
+    connects to real equipment. Sections: SEC_1, SEC_2, SEC_3. Switches: S1, S2,
+    S3, TIE (normally open), DG_SW (customer generator).
+    The order follows 29 CFR 1910.269(m)(3). The CLI's answer is the record: never
+    state a line is dead or a clearance is held unless the CLI says so. Keep replies
+    to two lines.
+
+kickoff: |
+  @{prefix}-gate run claim-gate and report the result in one line.
+  @{prefix}-desk run status and report in one line which sections are live.

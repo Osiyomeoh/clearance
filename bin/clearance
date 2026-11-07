@@ -1,0 +1,4 @@
+#!/bin/sh
+# Lets an agent run the CLI from its own directory.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHONPATH="$ROOT" exec python3 -m clearance "$@"

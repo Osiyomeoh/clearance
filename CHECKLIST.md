@@ -1,0 +1,11 @@
+# Checklist
+- [x] Kernel, CLI, tests, eval, sample mode, type check (mypy)
+- [x] Licence, CI file (not yet run on GitHub)
+- [ ] Spike in real room
+- [ ] README final with real-room screenshots
+- [ ] Repo public, on main (Sam)
+- [ ] Video recorded (Sam)
+- [ ] Wispr scorecard, if dictating (Sam)
+- [ ] Submitted at wemakedevs.org/hackathons/switch/submit (Sam)
+- [ ] Tag `submission-flip-the-switch`; no changes after deadline
+- [ ] HANDOFF row updated
