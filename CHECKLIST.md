@@ -1,11 +1,11 @@
 # Checklist
 - [x] Kernel, CLI, tests, eval, sample mode, type check (mypy)
-- [x] Licence, CI file (not yet run on GitHub)
+- [x] Licence, CI green on GitHub
 - [x] Spike in real room
 - [x] README final with real-room screenshots
 - [x] Real AI agents in a real room (`BRAIN=1`)
 - [ ] Optional: template deployed through Console (Sam)
-- [ ] Repo public, on main (Sam)
+- [x] Repo public, on main
 - [ ] Video recorded (Sam)
 - [ ] Wispr scorecard, if dictating (Sam)
 - [ ] Submitted at wemakedevs.org/hackathons/switch/submit (Sam)

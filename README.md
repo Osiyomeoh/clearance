@@ -11,7 +11,7 @@ Two line crews, one feeder, and an agent that only the system operator can instr
 ## See it in 60 seconds, with no keys
 Python 3.10+, no dependencies.
 ```sh
-git clone <this repo> && cd <this repo>
+git clone https://github.com/Osiyomeoh/clearance && cd clearance
 bin/clearance sample
 ```
 You'll see the kernel refuse a clearance because a generator can backfeed the section, then refuse to reenergize because Crew B is still on it.
@@ -49,7 +49,7 @@ In the Gateway run the crew lead is a known user who isn't the owner. In the Mat
 ## Run it live
 Needs Docker and Python 3.10+. This starts Switch's published local stack on ports 8000, 3000 and 8065.
 ```sh
-git clone <this repo> clearance && cd clearance
+git clone https://github.com/Osiyomeoh/clearance && cd clearance
 python3 -m venv .venv && .venv/bin/pip install -r live/requirements.txt
 
 mkdir -p .stack
