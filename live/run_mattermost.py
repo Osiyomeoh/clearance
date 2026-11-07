@@ -107,7 +107,9 @@ def main() -> None:
         if BRAIN:
             env["BRAIN_ROLE"] = role
         procs.append(subprocess.Popen([sys.executable, str(HERE / "room_agent.py"), "--dir", str(tmp / role), "--room", room["id"]], env=env))
-    time.sleep(4)
+    procs.append(subprocess.Popen([sys.executable, str(HERE / "board.py")], env={**E, "CLEARANCE_HOME": str(tmp / "state")}))
+    print(f"Board: http://localhost:8090  Channel: {name}", flush=True)
+    time.sleep(float(E.get("START_DELAY", "4")))  # time to open both before the first message
 
     def count() -> int:
         return len(adm.call("GET", f"/channels/{channel}/posts?per_page=200")["order"])
@@ -125,7 +127,7 @@ def main() -> None:
         if BRAIN:
             for speaker, role, text in LLM_SCENARIO:
                 say(op if speaker == "op" else crew, role, text)
-            time.sleep(3)
+            time.sleep(float(E.get("HOLD", "3")))  # keeps the board up at the end for recording
             report(adm, channel, name)
             return
         say(op, "gate", "claim-gate")

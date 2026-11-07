@@ -88,6 +88,7 @@ def main(argv: list[str]) -> int:
         try:
             getattr(k, GATE.get(cmd) or CREW[cmd])(*args)
         except Refused as e:
+            k.log.append({"seq": len(k.log) + 1, "action": "refused", "why": str(e)})  # shown on the board
             print(f"REFUSED: {e}")
             return 3
         except TypeError:

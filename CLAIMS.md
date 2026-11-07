@@ -14,6 +14,7 @@
 | Template valid | `POST /gateway/templates/validate`: ok, 0 errors, 0 warnings; `POST /gateway/templates`: 201 | Same stack |
 | Template deploys LLM agents through Console | **NOT VERIFIED** | Needs Console and a signed-in coding agent |
 | Claude agents complete the scenario in a real room, with Switch and kernel refusals | Measured, one Mattermost run and one Gateway run, Claude Code CLI, model alias `sonnet`, template instructions, not Console | `BRAIN=1 python -m live.run_mattermost`, `docs/live-llm-mattermost.txt`, `docs/live-llm.txt` |
+| Board shows the run live and read-only | Measured, one Mattermost AI run: state polled each second, showed the DG_SW refusal and the final S2 refusal. GET only; POST returns 501 | `live/board.py`, `BRAIN=1 python -m live.run_mattermost` |
 | Agent refused prompt injection and "force it" | Observed in those runs; LLM behaviour, not a guarantee | Same |
 | OSHA wording | Read at source | osha.gov 1910.269(m)(3) |
 | NERC: 17 sector fatalities Q1 2026 | All causes, not switching-specific | nerc.gov.ng, published Jul 21 2026 |

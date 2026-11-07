@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clearance Board</title><style>
+:root{--bg:#10151c;--panel:#18202a;--line:#2c3744;--text:#e8edf2;--dim:#93a1b0;--live:#ff5a4f;--dead:#5d6b7a;--crew:#ffc53d;--ok:#4cc38a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;padding:20px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin-bottom:14px}h1{font-size:22px;margin:0}header span{color:var(--dim)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+svg{width:100%;height:auto;display:block}svg text{font-family:inherit;fill:var(--text)}
+#ref{display:none;background:#46191a;border:1px solid var(--live);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+h2{font-size:13px;margin:0 0 8px;color:var(--dim);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.c{padding:8px 0;border-top:1px solid var(--line)}.c:first-of-type{border-top:0}.c b{color:var(--crew)}.m{color:var(--dim)}
+ol{list-style:none;margin:0;padding:0;font:13px/1.6 ui-monospace,Menlo,monospace}li{overflow-wrap:anywhere}li.r{color:var(--live);font-weight:600}
+.key{color:var(--dim);font-size:13px;margin-top:6px}.key i{font-style:normal;font-weight:700}
+</style></head><body>
+<header><h1>Clearance board</h1><span>SIMULATED feeder. Read only: every action goes through the room.</span></header>
+<div id="ref" role="alert"></div>
+<div class="card"><svg id="d" viewBox="0 0 1000 250" role="img" aria-label="Feeder diagram"></svg>
+<div class="key"><i style="color:var(--live)">Red</i> live · <i style="color:var(--dead)">Grey</i> dead · <i style="color:var(--crew)">Yellow</i> crew on section · Switch shown open or closed, with the clearances tagged on it</div></div>
+<div class="grid"><div class="card"><h2>Clearances</h2><div id="cl"></div></div><div class="card"><h2>Log</h2><ol id="log"></ol></div></div>
+<script>
+const NS='http://www.w3.org/2000/svg',X={SUB_A:50,S1:150,SEC_1:270,S2:390,SEC_2:510,S3:630,SEC_3:750,TIE:860,SUB_B:950};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n);
+function el(n,a,t){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;return e}
+function draw(s){const d=document.getElementById('d');d.replaceChildren();const live=new Set(s.live_sections),open=new Set(s.open_switches),y=80,
+ tags={};s.clearances.forEach(c=>c.tags.forEach(t=>(tags[t]=tags[t]||[]).push(c.id)));
+ const col=n=>css(live.has(n)?'--live':'--dead');
+ const seg=(x1,y1,x2,y2,c)=>d.append(el('line',{x1,y1,x2,y2,stroke:c,'stroke-width':7,'stroke-linecap':'round'}));
+ const source=(x,yy,name)=>{d.append(el('rect',{x:x-38,y:yy-20,width:76,height:40,rx:7,fill:css('--live')}));d.append(el('text',{x,y:yy+6,'text-anchor':'middle','font-size':15,'font-weight':700,style:'fill:#fff'},name))};
+ const sw=(name,x,yy,left,right,vert)=>{const isOpen=open.has(name);
+  d.append(el('circle',{cx:x,cy:yy,r:24,fill:css('--panel'),stroke:isOpen?css('--ok'):css('--text'),'stroke-width':3}));
+  d.append(el('text',{x,y:yy+5,'text-anchor':'middle','font-size':12,'font-weight':700},name));
+  d.append(el('text',{x:vert?x+34:x,y:vert?yy+5:yy-34,'text-anchor':vert?'start':'middle','font-size':12,style:'fill:'+(isOpen?css('--ok'):css('--dim'))},isOpen?'OPEN':'CLOSED'));
+  if(tags[name])d.append(el('text',{x:vert?x+34:x,y:vert?yy+22:yy+42,'text-anchor':vert?'start':'middle','font-size':12,style:'fill:'+css('--crew')},'TAG '+tags[name].join(' ')))};
+ seg(88,y,126,y,css('--live'));seg(174,y,366,y,col('SEC_1'));seg(414,y,606,y,col('SEC_2'));seg(654,y,836,y,col('SEC_3'));
+ seg(884,y,912,y,open.has('TIE')?css('--dead'):css('--live'));seg(510,y,510,146,col('SEC_2'));
+ source(X.SUB_A,y,'SUB A');source(X.SUB_B,y,'SUB B');source(510,222,'GEN');seg(510,194,510,202,css('--live'));
+ sw('S1',X.S1,y);sw('S2',X.S2,y);sw('S3',X.S3,y);sw('TIE',X.TIE,y);sw('DG_SW',510,170,0,0,true);
+ ['SEC_1','SEC_2','SEC_3'].forEach(n=>{const x=X[n],cr=s.clearances.filter(c=>c.section==n&&c.state=='issued').map(c=>c.crew);
+  const cx=n=='SEC_2'?x+55:x;
+  d.append(el('text',{x,y:y-22,'text-anchor':'middle','font-size':15,'font-weight':700,style:'fill:'+col(n)},n+(live.has(n)?' LIVE':' DEAD')));
+  if(cr.length)d.append(el('text',{x:cx,y:y+30,'text-anchor':'middle','font-size':14,'font-weight':700,style:'fill:'+css('--crew')},cr.join(' + ')))})}
+function fill(s){draw(s);const cl=document.getElementById('cl');cl.replaceChildren();
+ if(!s.clearances.length){const p=document.createElement('p');p.className='m';p.textContent='No clearances yet.';cl.append(p)}
+ s.clearances.forEach(c=>{const e=document.createElement('div');e.className='c';const b=document.createElement('b');b.textContent=c.id+' '+c.crew;const m=document.createElement('div');m.className='m';
+  m.textContent=c.section+' · '+c.state+' · tags: '+(c.tags.join(' ')||'none')+(c.grounded?' · grounded':'')+(c.on_line?' · on line':'');e.append(b,m);cl.append(e)});
+ const l=document.getElementById('log');l.replaceChildren();[...s.log].reverse().forEach(r=>{const i=document.createElement('li');const{seq,action,...rest}=r;
+  i.textContent=seq+' '+(action=='refused'?rest.why:action+' '+Object.values(rest).join(' '));if(action=='refused')i.className='r';l.append(i)});
+ const last=s.log[s.log.length-1],b=document.getElementById('ref');if(last&&last.action=='refused'){b.style.display='block';b.textContent='REFUSED: '+last.why}else b.style.display='none'}
+async function tick(){try{fill(await (await fetch('/state')).json())}catch(e){}setTimeout(tick,1000)}tick();
+</script></body></html>
