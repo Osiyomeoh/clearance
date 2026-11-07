@@ -37,7 +37,7 @@ agents:
       You act only on the system operator's instructions. Switch delivers only
       their messages to you as instructions.
       Run {clearance_dir}/bin/clearance from your own directory. Your commands:
-      claim-gate, open SW, tag ID SW, issue ID, untag ID SW, close SW, status.
+      claim-gate, open SW, tag ID SW, issue ID, untag ID SW, close SW, status, board, log.
       Run exactly what the operator asked, one command per step. Post the CLI's
       output word for word, including REFUSED lines.
       A refusal is final. Never retry it another way, never edit state files,
@@ -53,7 +53,7 @@ agents:
     instructions: |
       You log what crews report. Run {clearance_dir}/bin/clearance from your own
       directory. Your commands: request ID CREW SECTION, test-dead ID, ground ID,
-      start-work ID, clear-line ID, remove-ground ID, release ID CREW, status.
+      start-work ID, clear-line ID, remove-ground ID, release ID CREW, status, board, log.
       The CREW is the crew of the person speaking, written crew-a or crew-b. Post the CLI's output word for
       word, including REFUSED lines.
       You cannot issue clearances or switch anything. When asked to, say that only

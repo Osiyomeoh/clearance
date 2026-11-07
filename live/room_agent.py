@@ -49,13 +49,13 @@ def instructions(role: str) -> str:
     return "\n".join(lines).replace("{clearance_dir}", str(ROOT))
 
 
-def think(role: str, body: str, workdir: Path) -> str:
+def think(role: str, body: str, workdir: Path, env: dict[str, str] | None = None) -> str:
     """Hand the message to the signed-in Claude Code CLI, whose only tool is bin/clearance."""
     done = subprocess.run(
         ["claude", "-p", body, "--model", os.environ.get("BRAIN_MODEL", "sonnet"),
          "--append-system-prompt", instructions(role),
          "--allowedTools", f"Bash({CLI}:*)", "--setting-sources", ""],
-        cwd=workdir, capture_output=True, text=True, timeout=180)
+        cwd=workdir, capture_output=True, text=True, timeout=180, env=env)
     return done.stdout.strip() or f"agent error: exit {done.returncode}"
 
 

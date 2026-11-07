@@ -5,6 +5,8 @@ Mutations that happen to stay safe are counted as such, not as catches.
 """
 from __future__ import annotations
 import json
+import random
+from itertools import combinations
 from .kernel import Kernel, Refused
 from .scenarios import Step, VALID_ORDERS
 
@@ -47,5 +49,32 @@ def evaluate() -> dict[str, int]:
     return r
 
 
+def hostile(steps: list[Step], rng: random.Random) -> list[Step]:
+    """A broken order: reordered in places, steps dropped, and switches closed at random moments."""
+    out = list(steps)
+    for _ in range(rng.randint(0, 3)):
+        out.pop(rng.randrange(len(out)))
+    for _ in range(rng.randint(0, 3)):
+        i = rng.randrange(len(out) - 1)
+        out[i], out[i + 1] = out[i + 1], out[i]
+    for _ in range(rng.randint(1, 3)):
+        out.insert(rng.randrange(len(out) + 1), ("close_switch", (rng.choice(("S1", "S2", "S3", "TIE", "DG_SW")),)))
+    return out
+
+
+def stress(samples: int = 20000, seed: int = 269) -> dict[str, int]:
+    """Every pair of omissions, plus seeded random hostile orders. Same unsafe test as evaluate()."""
+    r = dict(cases=0, unsafe_without_kernel=0, unsafe_with_kernel=0)
+    rng = random.Random(seed)
+    orders = list(VALID_ORDERS.values())
+    cases = [[s for k, s in enumerate(o) if k not in pair] for o in orders for pair in combinations(range(len(o)), 2)]
+    cases += [hostile(rng.choice(orders), rng) for _ in range(samples)]
+    for steps in cases:
+        r["cases"] += 1
+        r["unsafe_without_kernel"] += run(steps, enforce=False)[0]
+        r["unsafe_with_kernel"] += run(steps, enforce=True)[0]
+    return r
+
+
 if __name__ == "__main__":
-    print(json.dumps(evaluate(), indent=2))
+    print(json.dumps({**evaluate(), "stress": stress()}, indent=2))

@@ -2,6 +2,9 @@
 | Claim | Status | Reproduce |
 |---|---|---|
 | 112 broken orders; unchecked 11 reach an unsafe state; with kernel 0; valid refused 0 | Measured, single-step omissions and adjacent swaps only | `python3 -m clearance.evaluate` |
+| 20,856 stress cases (all pairs of omissions, plus 20,000 seeded hostile orders): 11,140 unsafe unchecked, 0 with kernel | Measured, seed 269, simulated feeder | `python3 -m clearance.evaluate` |
+| 40 hostile messages at Claude agents, 0 breaches | Measured once, state-based, direct call and not through a room, model alias `sonnet` | `python3 live/redteam.py`, `docs/redteam.txt` |
+| `bin/demo` works on a clean stack | Run once on macOS, about 93 s, images already cached | `bin/demo` |
 | Close refused while another crew holds a tag | Tested, and seen in a real room | `tests/test_kernel.py`, `docs/live-mattermost.txt` |
 | Generator backfeed refused, path named | Tested, and seen in a real room | `tests/test_kernel.py`, `docs/live-mattermost.txt` |
 | Desk can't run gate commands | Tested, same-machine key file, not a sandbox | `tests/test_cli.py`, `docs/live-run.txt` |

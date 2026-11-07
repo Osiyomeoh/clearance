@@ -1,0 +1,32 @@
+#!/bin/sh
+# One command: start Switch's published local stack, then run the Clearance room in Mattermost.
+# Needs Docker and Python 3.10+. Add BRAIN=1 for Claude agents (needs a signed-in Claude Code CLI).
+set -eu
+cd "$(dirname "$0")/.."
+R=https://raw.githubusercontent.com/sandbox-quantum/switch/main
+mkdir -p .stack
+[ -d .venv ] || python3 -m venv .venv
+.venv/bin/pip install -q -r live/requirements.txt
+if [ ! -f .stack/.env ]; then
+  curl -fsSL "$R/deploy/local/standalone-docker-compose.yml" -o .stack/compose.yml
+  curl -fsSL "$R/deploy/local/generate-env-secrets.sh" -o .stack/generate-env-secrets.sh
+  curl -fsSL "$R/.env.example" -o .stack/.env
+  bash .stack/generate-env-secrets.sh .stack/.env local >/dev/null
+  chmod 600 .stack/.env
+fi
+docker compose -f .stack/compose.yml --env-file .stack/.env -p clearance-demo --profile collab --profile gateway up -d --quiet-pull
+set -a; . ./.stack/.env; set +a
+echo "Waiting for Switch and Mattermost..."
+i=0
+until curl -fs -o /dev/null http://localhost:8065/api/v4/system/ping \
+   && curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' \
+      -d "{\"email\":\"$GATEWAY_ADMIN_EMAIL\",\"password\":\"$GATEWAY_ADMIN_PASSWORD\"}" \
+      http://localhost:8000/gateway/auth/login | grep -q 200; do
+  i=$((i + 1)); [ "$i" -lt 90 ] || { echo "Stack did not come up after 3 minutes"; exit 1; }
+  sleep 2
+done
+sleep 10
+.venv/bin/python -m live.run_mattermost
+echo
+echo "Open http://localhost:8065 and sign in as $MATTERMOST_USER (password: MATTERMOST_USER_PASSWORD in .stack/.env)."
+echo "Stop with: docker compose -p clearance-demo down"

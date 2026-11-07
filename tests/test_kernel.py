@@ -103,6 +103,12 @@ class Eval(unittest.TestCase):
         self.assertEqual(r["valid_refused"], 0)
         self.assertGreater(r["unsafe_without_kernel"], 0)
 
+    def test_stress_no_unsafe_state_under_kernel(self):
+        from clearance.evaluate import stress
+        r = stress(samples=500)
+        self.assertEqual(r["unsafe_with_kernel"], 0)
+        self.assertGreater(r["unsafe_without_kernel"], 0)
+
     def test_mutant_generation(self):
         self.assertGreater(len(mutants(ONE_CREW)), len(ONE_CREW))
 

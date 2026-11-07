@@ -41,6 +41,22 @@ def is_gate() -> bool:
     return reg.exists() and KEY.exists() and digest(KEY.read_text().strip()) == reg.read_text().strip()
 
 
+def board(k) -> str:
+    """The feeder as one line, for a chat room. [ ] open, [X] closed, and who is on each section."""
+    status = k.status()
+    def sw(name: str) -> str:
+        return f"[ ]{name}" if name in status["open_switches"] else f"[X]{name}"
+    def sec(name: str) -> str:
+        crews = [g["crew"] for g in status["clearances"] if g["section"] == name and g["state"] == "issued"]
+        power = "LIVE" if name in status["live_sections"] else "DEAD"
+        return f"{name}({power}{' ' + '+'.join(crews) if crews else ''})"
+    lines = [f"SUB_A {sw('S1')} {sec('SEC_1')} {sw('S2')} {sec('SEC_2')} {sw('S3')} {sec('SEC_3')} {sw('TIE')} SUB_B",
+             f"DG {sw('DG_SW')} SEC_2"]
+    for g in status["clearances"]:
+        lines.append(f"{g['id']} {g['crew']} {g['state']} tags: {' '.join(g['tags']) or 'none'}")
+    return "\n".join(lines)
+
+
 def main(argv: list[str]) -> int:
     if not argv:
         print(__doc__)
@@ -55,12 +71,19 @@ def main(argv: list[str]) -> int:
     if cmd in GATE and not is_gate():
         print(f"REFUSED: {cmd} is for the gate agent only")
         return 3
-    if cmd != "status" and cmd not in GATE and cmd not in CREW:
+    if cmd not in ("status", "board", "log") and cmd not in GATE and cmd not in CREW:
         print(f"unknown command {cmd}")
         return 2
     with store.session() as k:
         if cmd == "status":
             print(json.dumps(k.status(), indent=1))
+            return 0
+        if cmd == "board":
+            print(board(k))
+            return 0
+        if cmd == "log":
+            for row in k.log:
+                print(json.dumps(row))
             return 0
         try:
             getattr(k, GATE.get(cmd) or CREW[cmd])(*args)
