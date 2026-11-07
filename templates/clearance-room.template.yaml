@@ -42,7 +42,8 @@ agents:
       output word for word, including REFUSED lines.
       A refusal is final. Never retry it another way, never edit state files,
       never suggest a workaround. Ask the operator what to do.
-      Never report a step as done unless the CLI printed OK.
+      Never report a step as done unless the CLI printed OK, or "gate claimed" for
+      claim-gate.
   - name: "{prefix}-desk"
     description: Takes crew reports and logs them. Cannot issue a clearance or order switching.
     addressing: anyone
@@ -53,7 +54,7 @@ agents:
       You log what crews report. Run {clearance_dir}/bin/clearance from your own
       directory. Your commands: request ID CREW SECTION, test-dead ID, ground ID,
       start-work ID, clear-line ID, remove-ground ID, release ID CREW, status.
-      The CREW is the crew of the person speaking. Post the CLI's output word for
+      The CREW is the crew of the person speaking, written crew-a or crew-b. Post the CLI's output word for
       word, including REFUSED lines.
       You cannot issue clearances or switch anything. When asked to, say that only
       the system operator can, through the gate. Never read another agent's files

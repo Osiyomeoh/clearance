@@ -41,6 +41,24 @@ def run(words: list[str], workdir: Path) -> str:
     return out or f"exit {done.returncode}"
 
 
+def instructions(role: str) -> str:
+    """The agent's instructions, word for word from the Switch template."""
+    text = (ROOT / "templates" / "clearance-room.template.yaml").read_text()
+    block = text.split(f'name: "{{prefix}}-{role}"')[1].split("instructions: |\n")[1]
+    lines = [ln[6:] for ln in block.splitlines() if ln.startswith("      ")]
+    return "\n".join(lines).replace("{clearance_dir}", str(ROOT))
+
+
+def think(role: str, body: str, workdir: Path) -> str:
+    """Hand the message to the signed-in Claude Code CLI, whose only tool is bin/clearance."""
+    done = subprocess.run(
+        ["claude", "-p", body, "--model", os.environ.get("BRAIN_MODEL", "sonnet"),
+         "--append-system-prompt", instructions(role),
+         "--allowedTools", f"Bash({CLI}:*)", "--setting-sources", ""],
+        cwd=workdir, capture_output=True, text=True, timeout=180)
+    return done.stdout.strip() or f"agent error: exit {done.returncode}"
+
+
 def post(base: str, agent: str, key: str, room: str, content: str) -> None:
     req = urllib.request.Request(
         f"{base}/agents/{agent}/message", method="POST",
@@ -55,6 +73,23 @@ async def serve(base: str, agent: str, key: str, room: str, workdir: Path) -> No
     url = base.replace("http", "ws", 1) + f"/agents/{agent}/connection/ws?connection_id={connection}&rooms={room}"
     cursor = 0
     seen: set[str] = set()
+    inbox: asyncio.Queue[str] = asyncio.Queue()
+
+    async def worker() -> None:
+        # One message at a time, off the socket loop: a slow reply must not stop the pongs.
+        role = os.environ.get("BRAIN_ROLE")
+        while True:
+            body = await inbox.get()
+            words = parse(body)
+            if role:
+                reply = await asyncio.to_thread(think, role, body, workdir)
+            elif words:
+                reply = await asyncio.to_thread(run, words, workdir)
+            else:
+                reply = "Say one command, for example: status"
+            await asyncio.to_thread(post, base, agent, key, room, reply)
+
+    task = asyncio.create_task(worker())  # kept referenced so it is not collected
     async with websockets.connect(url, additional_headers={"Authorization": f"Bearer {key}"}) as ws:
         async for raw in ws:
             frame = json.loads(raw)
@@ -70,9 +105,7 @@ async def serve(base: str, agent: str, key: str, room: str, workdir: Path) -> No
                 if not p.get("addressed") or mid in seen:
                     continue
                 seen.add(mid)
-                words = parse(p.get("body", ""))
-                reply = await asyncio.to_thread(run, words, workdir) if words else "Say one command, for example: status"
-                await asyncio.to_thread(post, base, agent, key, room, reply)
+                await inbox.put(p.get("body", ""))
 
 
 def main() -> None:

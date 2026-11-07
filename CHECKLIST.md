@@ -3,7 +3,8 @@
 - [x] Licence, CI file (not yet run on GitHub)
 - [x] Spike in real room
 - [x] README final with real-room screenshots
-- [ ] Template deployed with LLM agents through Console (Sam)
+- [x] Real AI agents in a real room (`BRAIN=1`)
+- [ ] Optional: template deployed through Console (Sam)
 - [ ] Repo public, on main (Sam)
 - [ ] Video recorded (Sam)
 - [ ] Wispr scorecard, if dictating (Sam)

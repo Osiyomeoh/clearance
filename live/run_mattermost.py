@@ -20,7 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from clearance.scenarios import finish, isolate  # noqa: E402
-from live.run_room import CMD, GATE_METHODS  # noqa: E402
+from live.run_room import BRAIN, CMD, GATE_METHODS, LLM_SCENARIO  # noqa: E402
 
 E = os.environ
 PACE = float(E.get("PACE", "1.5"))
@@ -51,6 +51,19 @@ def mm_login(login: str, password: str) -> Api:
     m.call("POST", "/users/login", {"login_id": login, "password": password})
     m.headers = {"Authorization": f"Bearer {m.token}"}
     return m
+
+
+def report(adm: Api, channel: str, name: str) -> None:
+    posts = adm.call("GET", f"/channels/{channel}/posts?per_page=200")
+    names: dict[str, str] = {}
+    for pid in reversed(posts["order"]):
+        p = posts["posts"][pid]
+        if p.get("type"):
+            continue
+        uid = p["user_id"]
+        names.setdefault(uid, adm.call("GET", f"/users/{uid}")["username"])
+        print(f"{names[uid]:>14} {' '.join(p['message'].split())}")
+    print(f"\nchannel {name}")
 
 
 def main() -> None:
@@ -91,14 +104,30 @@ def main() -> None:
     for role in agents:
         env = {**E, "SWITCH_URL": gw.base, "AGENT_ID": agents[role]["id"], "AGENT_KEY": agents[role]["api_key"],
                "CLEARANCE_HOME": str(tmp / "state")}
+        if BRAIN:
+            env["BRAIN_ROLE"] = role
         procs.append(subprocess.Popen([sys.executable, str(HERE / "room_agent.py"), "--dir", str(tmp / role), "--room", room["id"]], env=env))
     time.sleep(4)
 
+    def count() -> int:
+        return len(adm.call("GET", f"/channels/{channel}/posts?per_page=200")["order"])
+
     def say(who: Api, role: str, text: str) -> None:
+        before = count()
         who.call("POST", "/posts", {"channel_id": channel, "message": f"@{role} {text}"})
+        if BRAIN:
+            deadline = time.time() + 200
+            while time.time() < deadline and count() <= before + 1:
+                time.sleep(2)
         time.sleep(PACE)
 
     try:
+        if BRAIN:
+            for speaker, role, text in LLM_SCENARIO:
+                say(op if speaker == "op" else crew, role, text)
+            time.sleep(3)
+            report(adm, channel, name)
+            return
         say(op, "gate", "claim-gate")
         say(crew, "gate", "issue C-A")
         say(crew, "desk", "issue C-A")
@@ -116,16 +145,7 @@ def main() -> None:
         for p in procs:
             p.terminate()
 
-    posts = adm.call("GET", f"/channels/{channel}/posts?per_page=200")
-    names: dict[str, str] = {}
-    for pid in reversed(posts["order"]):
-        p = posts["posts"][pid]
-        if p.get("type"):
-            continue
-        uid = p["user_id"]
-        names.setdefault(uid, adm.call("GET", f"/users/{uid}")["username"])
-        print(f"{names[uid]:>14} {' '.join(p['message'].split())}")
-    print(f"\nchannel {name}")
+    report(adm, channel, name)
 
 
 if __name__ == "__main__":
